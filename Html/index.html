@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Registrierung</title>
+    <link rel="stylesheet" href="/Modul_183/Arbeit M183 2/CSS/styles.css"> <!-- Stelle sicher, dass dieser Pfad korrekt ist -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+    
+    <div class="language-selector">
+        <label for="language">🌍 Sprache:</label>
+        <select id="language" onchange="changeLanguage(this.value)">
+            <option value="de">Deutsch</option>
+            <option value="en">English</option>
+        </select>
+    </div>
+    
+    
+    <div class="container">
+        <h2 id="form-title">Login</h2>
+        
+        <div class="input-group">
+            <input type="text" id="username" placeholder="Benutzername" required>
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Passwort" required>
+        </div>
+
+        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+        <button onclick="handleAuth()">Login</button>
+
+        <p id="toggle-text">Noch kein Konto? <a href="/Html/Registrieren.html">Registrieren</a></p>
+        <p id="message"></p>
+    </div>
+
+    <script src="/JavaScript/script.js"></script> <!-- Prüfe, ob dein JS-Pfad stimmt -->
+</body>
+</html>
