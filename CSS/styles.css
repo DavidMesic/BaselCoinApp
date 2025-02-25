@@ -4,7 +4,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: url('/Modul_183/Arbeit M183 2/img/Bubbles\ Bathing\ GIF.gif') no-repeat center center fixed; /* Stelle sicher, dass der Pfad stimmt */
+    background: url('/img/Bubbles\ Bathing\ GIF.gif') no-repeat center center fixed; /* Stelle sicher, dass der Pfad stimmt */
     background-size: cover;
 }
 
