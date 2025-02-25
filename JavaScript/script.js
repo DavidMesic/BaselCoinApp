@@ -104,6 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
  
 // Login & Registrierung Funktion
+// Login & Registrierung Funktion (angepasst)
 function handleAuth() {
     const username = document.getElementById("username").value;
     const email = document.getElementById("email") ? document.getElementById("email").value : null;
@@ -112,17 +113,17 @@ function handleAuth() {
     const message = document.getElementById("message");
     const captchaResponse = grecaptcha.getResponse();
     const lang = localStorage.getItem("language") || "de";
- 
+
     if (!username || !password || (email !== null && !email)) {
         message.innerText = translations[lang].fillFields;
         return;
     }
- 
+
     if (!captchaResponse) {
         message.innerText = translations[lang].captchaError;
         return;
     }
- 
+
     if (document.title === "Registrierung") {
         if (!confirmPassword) {
             message.innerText = translations[lang].fillFields;
@@ -150,10 +151,14 @@ function handleAuth() {
         if (storedPassword && storedPassword === password) {
             message.style.color = "green";
             message.innerText = translations[lang].loginSuccess;
+            
+            // Benutzernamen in localStorage speichern
+            localStorage.setItem("loggedInUser", username);
+
             logEvent("LOGIN", username, "Benutzer hat sich eingeloggt");
             setTimeout(() => {
-                alert("Glückwunsch! Du bist eingeloggt.");
-            }, 500);
+                window.location.href = "Eingeloggt.html";
+            }, 1000);
         } else {
             message.style.color = "red";
             message.innerText = translations[lang].wrongCredentials;
@@ -170,4 +175,14 @@ function downloadLogs() {
     link.href = URL.createObjectURL(blob);
     link.download = "logs.txt";
     link.click();
+}
+
+function logOut() {
+    const username = localStorage.getItem("loggedInUser");
+    if (username) {
+        logEvent("LOGOUT", username, "Benutzer hat sich ausgeloggt");
+    }
+    
+    localStorage.removeItem("loggedInUser");
+    window.location.href = "index.html";
 }
