@@ -161,12 +161,6 @@ function handleAuth() {
     }
 }
  
-// Logs anzeigen
-function showLogs() {
-    let logs = JSON.parse(localStorage.getItem("app_logs")) || [];
-    document.getElementById("logDisplay").innerHTML = logs.join("<br>");
-}
- 
 // Logs als Datei herunterladen
 function downloadLogs() {
     let logs = JSON.parse(localStorage.getItem("app_logs")) || [];
