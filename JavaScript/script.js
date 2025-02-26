@@ -99,61 +99,87 @@ document.addEventListener("DOMContentLoaded", () => {
 //#region Login & Registrierung
 // Login & Registrierung Funktion
 function handleAuth(isRegistering = false) {
-    const username = document.getElementById("username").value;
+    const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
     const confirmPassword = document.getElementById("confirm-password") ? document.getElementById("confirm-password").value : null;
-    const email = document.getElementById("email") ? document.getElementById("email").value : null;
+    const email = document.getElementById("email") ? document.getElementById("email").value.trim() : null;
     const message = document.getElementById("message");
     const lang = localStorage.getItem("language") || "de";
-
-    // Überprüfen, ob der Benutzer gesperrt ist
+ 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+ 
+    // mindestens 15 Zeichen, ein Großbuchstabe, ein Kleinbuchstabe, eine Zahl und ein Sonderzeichen
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{15,}$/;
+ 
+    const minUsernameLength = 5;
+ 
+    // Prüfen, ob der Benutzer ausgesperrt ist
     if (timeoutUntil && new Date().getTime() < timeoutUntil) {
         const remainingTime = (timeoutUntil - new Date().getTime()) / 1000;
         message.style.color = "red";
         message.innerText = `${translations[lang].accountLocked} (${Math.ceil(remainingTime)} ${translations[lang].secondsRemaining})`;
         return;
     }
-
-    // Wenn Felder nicht ausgefüllt sind
+ 
+    // Überprüfung der leeren Felder
     if (!username || !password || (isRegistering && (!email || !confirmPassword))) {
         message.innerText = translations[lang].fillFields;
         return;
     }
-
+ 
+    // Überprüfung des Benutzernamens
+    if (username.length < minUsernameLength) {
+        message.innerText = `Der Nutzername muss mindestens ${minUsernameLength} Zeichen.`;
+        return;
+    }
+ 
+    // E-Mail-Validierung
+    if (isRegistering && !emailRegex.test(email)) {
+        message.innerText = "Bitte geben Sie eine gültige E-Mail Adresse ein.";
+        return;
+    }
+ 
+    // Passwortüberprüfung
+    if (!passwordRegex.test(password)) {
+        message.innerText = "Das Passwort muss mindestens 15 Zeichen lang sein, darunter ein Grossbuchstabe, ein Kleinbuchstabe, eine Zahl und ein Sonderzeichen.";
+        return;
+    }
+ 
     if (isRegistering) {
-        // Registrierung
+ 
         if (password !== confirmPassword) {
             message.innerText = translations[lang].passwordsDontMatch;
             return;
         }
-
+ 
+        // Prüfen, ob der Benutzer bereits existiert
         if (localStorage.getItem(username)) {
             message.innerText = translations[lang].userExists;
             return;
         }
-
+ 
+   
         localStorage.setItem(username, password);
         message.style.color = "green";
         message.innerText = translations[lang].registrationSuccess;
         logEvent("REGISTER", username, "Benutzer hat sich registriert");
     } else {
-        // Login
         const storedPassword = localStorage.getItem(username);
-
+ 
         if (storedPassword && storedPassword === password) {
             message.style.color = "green";
             message.innerText = translations[lang].loginSuccess;
             failedAttempts = 0;
             localStorage.setItem("loggedInUser", username);
             logEvent("LOGIN", username, "Benutzer hat sich eingeloggt");
-
+ 
             setTimeout(() => {
                 window.location.href = "Eingeloggt.html";
             }, 500);
         } else {
             failedAttempts++;
             message.style.color = "red";
-
+ 
             if (failedAttempts >= 3) {
                 timeoutUntil = new Date().getTime() + loginTimeout;
                 timeoutUI = `${loginTimeout / 1000} ${translations[lang].secondsRemaining}`;
