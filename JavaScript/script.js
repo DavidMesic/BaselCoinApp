@@ -1,4 +1,5 @@
 //#region Sprachen
+//#region Wörterliste
 // Übersetzungen für Mehrsprachigkeit
 const translations = {
     de: {
@@ -54,8 +55,65 @@ const translations = {
         downloadLogs: "Download Logs",
         accountLocked: "Account locked",
         secondsRemaining: "seconds remaining"
+    },
+    fr: {
+        loginTitle: "Connexion",
+        registerTitle: "Inscription",
+        usernamePlaceholder: "Nom d'utilisateur",
+        emailPlaceholder: "E-mail",
+        passwordPlaceholder: "Mot de passe",
+        confirmPasswordPlaceholder: "Confirmer le mot de passe",
+        loginButton: "Connexion",
+        registerButton: "S'inscrire",
+        registerText: "Pas encore de compte?",
+        registerLink: "S'inscrire",
+        registerRedirect: "Inscription.html",
+        loginRedirect: "index.html",
+        alreadyHaveAccount: "Déjà un compte?",
+        loginLink: "Se connecter",
+        fillFields: "Veuillez remplir tous les champs!",
+        passwordsDontMatch: "Les mots de passe ne correspondent pas!",
+        userExists: "L'utilisateur existe déjà!",
+        registrationSuccess: "Inscription réussie! Connectez-vous maintenant.",
+        loginSuccess: "Connexion réussie!",
+        wrongCredentials: "Nom d'utilisateur ou mot de passe incorrect!",
+        captchaError: "Veuillez confirmer que vous n'êtes pas un robot!",
+        showLogs: "Afficher les journaux",
+        downloadLogs: "Télécharger les journaux",
+        accountLocked: "Compte verrouillé",
+        secondsRemaining: "secondes restantes"
+    },
+    it: {
+        loginTitle: "Accesso",
+        registerTitle: "Registrazione",
+        usernamePlaceholder: "Nome utente",
+        emailPlaceholder: "Email",
+        passwordPlaceholder: "Password",
+        confirmPasswordPlaceholder: "Conferma Password",
+        loginButton: "Accedi",
+        registerButton: "Registrati",
+        registerText: "Non hai ancora un account?",
+        registerLink: "Registrati",
+        registerRedirect: "Registrazione.html",
+        loginRedirect: "index.html",
+        alreadyHaveAccount: "Hai già un account?",
+        loginLink: "Accedi",
+        fillFields: "Si prega di compilare tutti i campi!",
+        passwordsDontMatch: "Le password non corrispondono!",
+        userExists: "L'utente esiste già!",
+        registrationSuccess: "Registrazione avvenuta con successo! Ora accedi.",
+        loginSuccess: "Accesso riuscito!",
+        wrongCredentials: "Nome utente o password errati!",
+        captchaError: "Si prega di confermare che non sei un robot!",
+        showLogs: "Mostra registri",
+        downloadLogs: "Scarica registri",
+        accountLocked: "Account bloccato",
+        secondsRemaining: "secondi rimanenti"
     }
 };
+//#endregion
+
+
 
 // Funktion zur Sprachänderung
 function changeLanguage(lang) {
@@ -84,14 +142,12 @@ function changeLanguage(lang) {
     document.getElementById("toggle-text").innerHTML = document.title === "Registrierung"
         ? `${translations[lang].alreadyHaveAccount} <a href="${translations[lang].loginRedirect}" id="login-link">${translations[lang].loginLink}</a>`
         : `${translations[lang].registerText} <a href="${translations[lang].registerRedirect}" id="register-link">${translations[lang].registerLink}</a>`;
-}
 
-document.addEventListener("DOMContentLoaded", () => {
-    let savedLang = localStorage.getItem("language") || "de";
-    console.log("Gespeicherte Sprache:", savedLang);
-    document.getElementById("language").value = savedLang;
-    changeLanguage(savedLang);
-});
+    const downloadLogsButton = document.querySelector("button[onclick='downloadLogs()']");
+    if (downloadLogsButton) {
+        downloadLogsButton.innerText = translations[lang].downloadLogs;
+    }
+}
 //#endregion
 
 
