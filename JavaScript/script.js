@@ -216,19 +216,33 @@ function logOut() {
 
 
 //#region Logging
+function getIPAddress(callback) {
+    fetch("https://api64.ipify.org?format=json")
+        .then(response => response.json())
+        .then(data => callback(data.ip))
+        .catch(error => {
+            console.error("Fehler beim Abrufen der IP-Adresse:", error);
+            callback("Unbekannt");
+        });
+}
+
+
+
 // Logging-Funktion
 function logEvent(eventType, user, action) {
-    const timestamp = new Date().toISOString();
-    const logEntry = `${timestamp} | ${eventType} | ${user} | ${action}`;
- 
-    // Logs aus LocalStorage abrufen
-    let logs = JSON.parse(localStorage.getItem("app_logs")) || [];
-    logs.push(logEntry);
- 
-    // Logs wieder speichern
-    localStorage.setItem("app_logs", JSON.stringify(logs));
- 
-    console.log("Log gespeichert:", logEntry);
+    getIPAddress(ip => {
+        const timestamp = new Date().toISOString();
+        const logEntry = `${timestamp} | ${ip} | ${eventType} | ${user} | ${action}`;
+
+        // Logs aus LocalStorage abrufen
+        let logs = JSON.parse(localStorage.getItem("app_logs")) || [];
+        logs.push(logEntry);
+
+        // Logs wieder speichern
+        localStorage.setItem("app_logs", JSON.stringify(logs));
+
+        console.log("Log gespeichert:", logEntry);
+    });
 }
  
 

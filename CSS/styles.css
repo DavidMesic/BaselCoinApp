@@ -4,12 +4,12 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: url('/img/Clouds.webp') no-repeat center center fixed; /* Stelle sicher, dass der Pfad stimmt */
+    background: url('/img/Bubbles\ Bathing\ GIF.gif') no-repeat center center fixed;
     background-size: cover;
 }
  
 .container {
-    background:rgba(173, 216, 230, 0.8);
+    background:rgba(173, 216, 230, 0.9);
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
