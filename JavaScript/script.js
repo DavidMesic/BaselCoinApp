@@ -185,19 +185,19 @@ function handleAuth(isRegistering = false) {
  
     // Überprüfung des Benutzernamens
     if (username.length < minUsernameLength) {
-        message.innerText = `Der Nutzername muss mindestens ${minUsernameLength} Zeichen.`;
+        message.innerText = `Der Nutzername muss mindestens ${minUsernameLength} Zeichen.`; 
         return;
     }
  
-    // E-Mail-Validierung
+    // E-Mail-Validierung nur bei der Registrierung
     if (isRegistering && !emailRegex.test(email)) {
         message.innerText = "Bitte geben Sie eine gültige E-Mail Adresse ein.";
         return;
     }
  
-    // Passwortüberprüfung
-    if (!passwordRegex.test(password)) {
-        message.innerText = "Das Passwort muss mindestens 15 Zeichen lang sein, darunter ein Grossbuchstabe, ein Kleinbuchstabe, eine Zahl und ein Sonderzeichen.";
+    // Passwortüberprüfung nur bei der Registrierung
+    if (isRegistering && !passwordRegex.test(password)) {
+        message.innerText = "Das Passwort muss mindestens 15 Zeichen lang sein, darunter ein Großbuchstabe, ein Kleinbuchstabe, eine Zahl und ein Sonderzeichen.";
         return;
     }
  
@@ -214,12 +214,13 @@ function handleAuth(isRegistering = false) {
             return;
         }
  
-   
+        // Benutzer registrieren
         localStorage.setItem(username, password);
         message.style.color = "green";
         message.innerText = translations[lang].registrationSuccess;
         logEvent("REGISTER", username, "Benutzer hat sich registriert");
     } else {
+        // Login Logik
         const storedPassword = localStorage.getItem(username);
  
         if (storedPassword && storedPassword === password) {
@@ -247,6 +248,7 @@ function handleAuth(isRegistering = false) {
         }
     }
 }
+
 
 
 // Logout Funktion
@@ -305,7 +307,7 @@ function resetInactivityTimer() {
 }
 
 function logOutDueToInactivity() {
-    alert("Du bist 30 Sekunden inaktiv. Du wirst jetzt ausgeloggt.");
+    alert("Du bist 15 Sekunden inaktiv. Du wirst jetzt ausgeloggt.");
     window.location.href = "index.html";
 }
 
