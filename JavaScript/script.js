@@ -102,52 +102,70 @@ document.addEventListener("DOMContentLoaded", () => {
 
 //#region Login & Registrierung
 // Login & Registrierung Funktion
-function handleAuth() {
+function handleAuth(isRegistering = false) {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirm-password") ? document.getElementById("confirm-password").value : null;
+    const email = document.getElementById("email") ? document.getElementById("email").value : null;
     const message = document.getElementById("message");
     const lang = localStorage.getItem("language") || "de";
 
     // Überprüfen, ob der Benutzer gesperrt ist
     if (timeoutUntil && new Date().getTime() < timeoutUntil) {
-        const remainingTime = (timeoutUntil - new Date().getTime()) / 1000; // Verbleibende Zeit in Sekunden
+        const remainingTime = (timeoutUntil - new Date().getTime()) / 1000;
         message.style.color = "red";
         message.innerText = `${translations[lang].accountLocked} (${Math.ceil(remainingTime)} ${translations[lang].secondsRemaining})`;
         return;
     }
 
-    // Wenn Benutzername oder Passwort fehlen
-    if (!username || !password) {
+    // Wenn Felder nicht ausgefüllt sind
+    if (!username || !password || (isRegistering && (!email || !confirmPassword))) {
         message.innerText = translations[lang].fillFields;
         return;
     }
 
-    const storedPassword = localStorage.getItem(username);
+    if (isRegistering) {
+        // Registrierung
+        if (password !== confirmPassword) {
+            message.innerText = translations[lang].passwordsDontMatch;
+            return;
+        }
 
-    if (storedPassword && storedPassword === password) {
-        // Erfolgreicher Login
+        if (localStorage.getItem(username)) {
+            message.innerText = translations[lang].userExists;
+            return;
+        }
+
+        localStorage.setItem(username, password);
         message.style.color = "green";
-        message.innerText = translations[lang].loginSuccess;
-        failedAttempts = 0;
-        logEvent("LOGIN", username, "Benutzer hat sich eingeloggt");
-        setTimeout(() => {
-            window.location.href = "Eingeloggt.html";
-        }, 500);
+        message.innerText = translations[lang].registrationSuccess;
+        logEvent("REGISTER", username, "Benutzer hat sich registriert");
     } else {
-        // Fehlgeschlagener Login
-        failedAttempts++;
-        message.style.color = "red";
+        // Login
+        const storedPassword = localStorage.getItem(username);
 
-        // Wenn 3 fehlgeschlagene Versuche erreicht wurden
-        if (failedAttempts >= 3) {
-            const username = document.getElementById("username").value;
-            // Setzt zukünftiges Entsperrungsdatum
-            timeoutUntil = new Date().getTime() + loginTimeout;
-            timeoutUI = "(" + (loginTimeout / 1000) + " Sekunden Sperre)"
-            logEvent("GESPERRT", username, `Benutzer hat zu viele Passwort-Fehlversuche gehabt ${timeoutUI}`)
-            message.innerText = `${translations[lang].wrongCredentials} ${translations[lang].accountLocked} ${timeoutUI}`;
+        if (storedPassword && storedPassword === password) {
+            message.style.color = "green";
+            message.innerText = translations[lang].loginSuccess;
+            failedAttempts = 0;
+            localStorage.setItem("loggedInUser", username);
+            logEvent("LOGIN", username, "Benutzer hat sich eingeloggt");
+
+            setTimeout(() => {
+                window.location.href = "Eingeloggt.html";
+            }, 500);
         } else {
-            message.innerText = translations[lang].wrongCredentials;
+            failedAttempts++;
+            message.style.color = "red";
+
+            if (failedAttempts >= 3) {
+                timeoutUntil = new Date().getTime() + loginTimeout;
+                timeoutUI = `(${loginTimeout / 1000} ${translations[lang].secondsRemaining})`;
+                logEvent("GESPERRT", username, `Benutzer hat zu viele Passwort-Fehlversuche gehabt ${timeoutUI}`);
+                message.innerText = `${translations[lang].wrongCredentials} ${translations[lang].accountLocked} ${timeoutUI}`;
+            } else {
+                message.innerText = translations[lang].wrongCredentials;
+            }
         }
     }
 }
