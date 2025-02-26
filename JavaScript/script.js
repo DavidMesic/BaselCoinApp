@@ -101,6 +101,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 //#region Login & Registrierung
+// Funktion zur Überprüfung der E-Mail-Adresse
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+// Funktion zur Überprüfung der Passwort-Richtlinien
+function isValidPassword(password) {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{15,}$/;
+    return passwordRegex.test(password);
+}
+
+
+
 // Login & Registrierung Funktion
 function handleAuth(isRegistering = false) {
     const username = document.getElementById("username").value;
@@ -110,10 +124,11 @@ function handleAuth(isRegistering = false) {
     const message = document.getElementById("message");
     const lang = localStorage.getItem("language") || "de";
 
+    message.style.color = "red"; // Alle Fehlermeldungen in ROT
+
     // Überprüfen, ob der Benutzer gesperrt ist
     if (timeoutUntil && new Date().getTime() < timeoutUntil) {
         const remainingTime = (timeoutUntil - new Date().getTime()) / 1000;
-        message.style.color = "red";
         message.innerText = `${translations[lang].accountLocked} (${Math.ceil(remainingTime)} ${translations[lang].secondsRemaining})`;
         return;
     }
@@ -126,6 +141,19 @@ function handleAuth(isRegistering = false) {
 
     if (isRegistering) {
         // Registrierung
+
+        // E-Mail-Validierung
+        if (!isValidEmail(email)) {
+            message.innerText = "Bitte eine gültige E-Mail-Adresse eingeben!";
+            return;
+        }
+
+        // Passwort-Validierung
+        if (!isValidPassword(password)) {
+            message.innerText = "Das Passwort muss mindestens 15 Zeichen lang sein, Groß- und Kleinbuchstaben, eine Zahl und ein Sonderzeichen enthalten!";
+            return;
+        }
+
         if (password !== confirmPassword) {
             message.innerText = translations[lang].passwordsDontMatch;
             return;
@@ -136,16 +164,16 @@ function handleAuth(isRegistering = false) {
             return;
         }
 
-        localStorage.setItem(username, password);
-        message.style.color = "green";
+        localStorage.setItem(username, JSON.stringify({ password, email }));
+        message.style.color = "green"; // Erfolgsnachricht in GRÜN
         message.innerText = translations[lang].registrationSuccess;
         logEvent("REGISTER", username, "Benutzer hat sich registriert");
     } else {
         // Login
-        const storedPassword = localStorage.getItem(username);
-
-        if (storedPassword && storedPassword === password) {
-            message.style.color = "green";
+        const storedData = JSON.parse(localStorage.getItem(username));
+        
+        if (storedData && storedData.password === password) {
+            message.style.color = "green"; // Erfolgreicher Login in GRÜN
             message.innerText = translations[lang].loginSuccess;
             failedAttempts = 0;
             localStorage.setItem("loggedInUser", username);
@@ -156,8 +184,7 @@ function handleAuth(isRegistering = false) {
             }, 500);
         } else {
             failedAttempts++;
-            message.style.color = "red";
-
+            
             if (failedAttempts >= 3) {
                 timeoutUntil = new Date().getTime() + loginTimeout;
                 timeoutUI = `(${loginTimeout / 1000} ${translations[lang].secondsRemaining})`;
