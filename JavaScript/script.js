@@ -140,8 +140,8 @@ function changeLanguage(lang) {
 
     document.querySelector("button").innerText = translations[lang][document.title === "Registrierung" ? "registerButton" : "loginButton"];
     document.getElementById("toggle-text").innerHTML = document.title === "Registrierung"
-        ? `${translations[lang].alreadyHaveAccount} <a href="${translations[lang].loginRedirect}" id="login-link">${translations[lang].loginLink}</a>`
-        : `${translations[lang].registerText} <a href="${translations[lang].registerRedirect}" id="register-link">${translations[lang].registerLink}</a>`;
+    ? `${translations[lang].alreadyHaveAccount} <a href="/Html/Registrieren.html" id="register-link">${translations[lang].registerLink}</a>`
+    : `${translations[lang].registerText} <a href="/Html/Registrieren.html" id="register-link">${translations[lang].registerLink}</a>`;
 
     const downloadLogsButton = document.querySelector("button[onclick='downloadLogs()']");
     if (downloadLogsButton) {
