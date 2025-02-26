@@ -57,21 +57,19 @@ const translations = {
     }
 };
 
-
-
 // Funktion zur Sprachänderung
 function changeLanguage(lang) {
     console.log("Sprachänderung ausgelöst:", lang);
     localStorage.setItem("language", lang);
- 
+
     if (!translations[lang]) {
         console.error("Fehler: Sprache nicht gefunden!", lang);
         return;
     }
- 
+
     document.getElementById("form-title").innerText = translations[lang][document.title === "Registrierung" ? "registerTitle" : "loginTitle"];
     document.getElementById("username").placeholder = translations[lang].usernamePlaceholder;
- 
+
     if (document.getElementById("email")) {
         document.getElementById("email").placeholder = translations[lang].emailPlaceholder;
     }
@@ -81,13 +79,13 @@ function changeLanguage(lang) {
     if (document.getElementById("confirm-password")) {
         document.getElementById("confirm-password").placeholder = translations[lang].confirmPasswordPlaceholder;
     }
- 
+
     document.querySelector("button").innerText = translations[lang][document.title === "Registrierung" ? "registerButton" : "loginButton"];
     document.getElementById("toggle-text").innerHTML = document.title === "Registrierung"
         ? `${translations[lang].alreadyHaveAccount} <a href="${translations[lang].loginRedirect}" id="login-link">${translations[lang].loginLink}</a>`
         : `${translations[lang].registerText} <a href="${translations[lang].registerRedirect}" id="register-link">${translations[lang].registerLink}</a>`;
 }
- 
+
 document.addEventListener("DOMContentLoaded", () => {
     let savedLang = localStorage.getItem("language") || "de";
     console.log("Gespeicherte Sprache:", savedLang);
@@ -98,23 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-
-
 //#region Login & Registrierung
-// Funktion zur Überprüfung der E-Mail-Adresse
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
-
-// Funktion zur Überprüfung der Passwort-Richtlinien
-function isValidPassword(password) {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{15,}$/;
-    return passwordRegex.test(password);
-}
-
-
-
 // Login & Registrierung Funktion
 function handleAuth(isRegistering = false) {
     const username = document.getElementById("username").value;
@@ -124,11 +106,10 @@ function handleAuth(isRegistering = false) {
     const message = document.getElementById("message");
     const lang = localStorage.getItem("language") || "de";
 
-    message.style.color = "red"; // Alle Fehlermeldungen in ROT
-
     // Überprüfen, ob der Benutzer gesperrt ist
     if (timeoutUntil && new Date().getTime() < timeoutUntil) {
         const remainingTime = (timeoutUntil - new Date().getTime()) / 1000;
+        message.style.color = "red";
         message.innerText = `${translations[lang].accountLocked} (${Math.ceil(remainingTime)} ${translations[lang].secondsRemaining})`;
         return;
     }
@@ -141,19 +122,6 @@ function handleAuth(isRegistering = false) {
 
     if (isRegistering) {
         // Registrierung
-
-        // E-Mail-Validierung
-        if (!isValidEmail(email)) {
-            message.innerText = "Bitte eine gültige E-Mail-Adresse eingeben!";
-            return;
-        }
-
-        // Passwort-Validierung
-        if (!isValidPassword(password)) {
-            message.innerText = "Das Passwort muss mindestens 15 Zeichen lang sein, Groß- und Kleinbuchstaben, eine Zahl und ein Sonderzeichen enthalten!";
-            return;
-        }
-
         if (password !== confirmPassword) {
             message.innerText = translations[lang].passwordsDontMatch;
             return;
@@ -164,16 +132,16 @@ function handleAuth(isRegistering = false) {
             return;
         }
 
-        localStorage.setItem(username, JSON.stringify({ password, email }));
-        message.style.color = "green"; // Erfolgsnachricht in GRÜN
+        localStorage.setItem(username, password);
+        message.style.color = "green";
         message.innerText = translations[lang].registrationSuccess;
         logEvent("REGISTER", username, "Benutzer hat sich registriert");
     } else {
         // Login
-        const storedData = JSON.parse(localStorage.getItem(username));
-        
-        if (storedData && storedData.password === password) {
-            message.style.color = "green"; // Erfolgreicher Login in GRÜN
+        const storedPassword = localStorage.getItem(username);
+
+        if (storedPassword && storedPassword === password) {
+            message.style.color = "green";
             message.innerText = translations[lang].loginSuccess;
             failedAttempts = 0;
             localStorage.setItem("loggedInUser", username);
@@ -184,11 +152,12 @@ function handleAuth(isRegistering = false) {
             }, 500);
         } else {
             failedAttempts++;
-            
+            message.style.color = "red";
+
             if (failedAttempts >= 3) {
                 timeoutUntil = new Date().getTime() + loginTimeout;
-                timeoutUI = `(${loginTimeout / 1000} ${translations[lang].secondsRemaining})`;
-                logEvent("GESPERRT", username, `Benutzer hat zu viele Passwort-Fehlversuche gehabt ${timeoutUI}`);
+                timeoutUI = `${loginTimeout / 1000} ${translations[lang].secondsRemaining}`;
+                logEvent("GESPERRT", username, `Benutzer hat zu viele Passwort-Fehlversuche gehabt (${timeoutUI})`);
                 message.innerText = `${translations[lang].wrongCredentials} ${translations[lang].accountLocked} ${timeoutUI}`;
             } else {
                 message.innerText = translations[lang].wrongCredentials;
@@ -196,7 +165,6 @@ function handleAuth(isRegistering = false) {
         }
     }
 }
-
 
 
 // Logout Funktion
@@ -213,38 +181,21 @@ function logOut() {
 
 
 
-
-
 //#region Logging
-function getIPAddress(callback) {
-    fetch("https://api64.ipify.org?format=json")
-        .then(response => response.json())
-        .then(data => callback(data.ip))
-        .catch(error => {
-            console.error("Fehler beim Abrufen der IP-Adresse:", error);
-            callback("Unbekannt");
-        });
-}
-
-
-
 // Logging-Funktion
 function logEvent(eventType, user, action) {
-    getIPAddress(ip => {
-        const timestamp = new Date().toISOString();
-        const logEntry = `${timestamp} | ${ip} | ${eventType} | ${user} | ${action}`;
+    const timestamp = new Date().toISOString();
+    const logEntry = `${timestamp} | ${eventType} | ${user} | ${action}`;
 
-        // Logs aus LocalStorage abrufen
-        let logs = JSON.parse(localStorage.getItem("app_logs")) || [];
-        logs.push(logEntry);
+    // Logs aus LocalStorage abrufen
+    let logs = JSON.parse(localStorage.getItem("app_logs")) || [];
+    logs.push(logEntry);
 
-        // Logs wieder speichern
-        localStorage.setItem("app_logs", JSON.stringify(logs));
+    // Logs wieder speichern
+    localStorage.setItem("app_logs", JSON.stringify(logs));
 
-        console.log("Log gespeichert:", logEntry);
-    });
+    console.log("Log gespeichert:", logEntry);
 }
- 
 
 
 // Logs als Datei herunterladen
@@ -261,40 +212,30 @@ function downloadLogs() {
 
 
 
-
-
 //#region Session-Management
 // Timer für Session-Management
 let inactivityTimer;
 const inactivityTimeout = 15000;
-
-
 
 function resetInactivityTimer() {
     clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(logOutDueToInactivity, inactivityTimeout);
 }
 
-
-
 function logOutDueToInactivity() {
     alert("Du bist 30 Sekunden inaktiv. Du wirst jetzt ausgeloggt.");
     window.location.href = "index.html";
 }
 
-
-
 if (window.location.pathname.includes("Eingeloggt.html")) {
     document.addEventListener("mousemove", resetInactivityTimer);
     document.addEventListener("keydown", resetInactivityTimer);
-  
+
     document.addEventListener("DOMContentLoaded", () => {
         resetInactivityTimer();
     });
 }
 //#endregion
-
-
 
 
 
